@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Scam Shield | Smart Scam Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <a href="#dashboard" class="brand">
+                <span class="brand-icon">🛡️</span>
+                <span>Scam <span class="brand-highlight">Shield</span></span>
+            </a>
+
+            <p class="sidebar-subtitle">
+                Smart Scam Detection System
+            </p>
+
+            <nav class="navigation">
+                <a href="#dashboard" class="nav-link active">
+                    <span>⌂</span> Dashboard
+                </a>
+
+                <a href="#scanner" class="nav-link">
+                    <span>⌕</span> Scan URL / Message
+                </a>
+
+                <a href="#history" class="nav-link">
+                    <span>◷</span> Scan History
+                </a>
+
+                <a href="#safety" class="nav-link">
+                    <span>◇</span> Safety Tips
+                </a>
+
+                <a href="#about" class="nav-link">
+                    <span>ⓘ</span> About Project
+                </a>
+            </nav>
+
+            <div class="sidebar-note">
+                <div class="sidebar-note-icon">🛡️</div>
+                <h3>Stay Alert. Stay Safe.</h3>
+                <p>Think before you click.</p>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content" id="dashboard">
+
+            <!-- TOP BAR -->
+            <div class="topbar">
+                <div>
+                    <p class="topbar-label">SECURITY DASHBOARD</p>
+                    <h2>Welcome to Scam Shield</h2>
+                </div>
+
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    Scam Scanner
+                </div>
+            </div>
+
+            <!-- HERO -->
+            <section class="hero dashboard-hero">
+                <div class="hero-content">
+                    <span class="hero-tag">YOUR ONLINE SAFETY COMPANION</span>
+
+                    <h1>Think Before<br> You Click.</h1>
+
+                    <p>
+                        Analyze suspicious links and messages
+                        to identify potential scam warning signs.
+                    </p>
+
+                    <a href="#scanner" class="hero-button">
+                        Start Scanning <span>→</span>
+                    </a>
+                </div>
+
+                <div class="hero-art" aria-hidden="true">
+                    <div class="hero-orbit orbit-one"></div>
+                    <div class="hero-orbit orbit-two"></div>
+                    <div class="shield-illustration">✓</div>
+                    <div class="hero-spark spark-one">✦</div>
+                    <div class="hero-spark spark-two">✧</div>
+                </div>
+            </section>
+
+            <!-- STATISTICS -->
+            <section class="stats-grid" aria-label="Scan statistics">
+
+                <article class="stat-card blue-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">⌕</span>
+                        <span class="stat-label">Total Scans</span>
+                    </div>
+
+                    <h3>{{ history|length }}</h3>
+                    <p>Recent records shown below</p>
+                </article>
+
+                <article class="stat-card red-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">⚠</span>
+                        <span class="stat-label">High Risk</span>
+                    </div>
+
+                    <h3>{{ history|selectattr("risk", "equalto", "High")|list|length }}</h3>
+                    <p>High-risk recent scans</p>
+                </article>
+
+                <article class="stat-card green-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">✓</span>
+                        <span class="stat-label">Low Risk</span>
+                    </div>
+
+                    <h3>{{ history|selectattr("risk", "equalto", "Low")|list|length }}</h3>
+                    <p>Low-risk recent scans</p>
+                </article>
+
+                <article class="stat-card purple-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">◷</span>
+                        <span class="stat-label">Medium Risk</span>
+                    </div>
+
+                    <h3>{{ history|selectattr("risk", "equalto", "Medium")|list|length }}</h3>
+                    <p>Medium-risk recent scans</p>
+                </article>
+
+            </section>
+
+            <!-- SCANNER AND SAFETY TIPS -->
+            <div class="content-grid">
+
+                <section class="scanner scanner-panel" id="scanner">
+
+                    <div class="section-heading">
+                        <div class="heading-icon">⌕</div>
+                        <div>
+                            <h2>Scam Scanner</h2>
+                            <p>Check a suspicious link or message.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="#scanner">
+
+                        <label for="scan_type">Choose scan type</label>
+
+                        <select name="scan_type" id="scan_type">
+                            <option value="url"
+                                {% if request.form.get('scan_type') == 'url' %}selected{% endif %}>
+                                Website URL
+                            </option>
+
+                            <option value="message"
+                                {% if request.form.get('scan_type') == 'message' %}selected{% endif %}>
+                                SMS / WhatsApp Message
+                            </option>
+                        </select>
+
+                        <label for="text">Enter link or message</label>
+
+                        <textarea
+                            name="text"
+                            id="text"
+                            rows="4"
+                            placeholder="Paste your suspicious link or message here..."
+                            required>{{ request.form.get('text', '') }}</textarea>
+
+                        <div class="form-footer">
+                            <span class="privacy-note">
+                                🛡️ Basic pattern-based analysis
+                            </span>
+
+                            <button type="submit" class="analyze-button">
+                                Analyze Now <span>→</span>
+                            </button>
+                        </div>
+
+                    </form>
+
+                    {% if result %}
+                    <div class="result scan-result">
+
+                        <div class="result-heading">
+                            <h2>Scan Result</h2>
+
+                            <span class="risk risk-{{ result.risk|lower }}">
+                                {{ result.risk }} Risk
+                            </span>
+                        </div>
+
+                        <p>
+                            <strong>Status:</strong>
+                            {{ result.status }}
+                        </p>
+
+                        <p>
+                            <strong>Analyzed Input:</strong>
+                            {{ result.input }}
+                        </p>
+
+                        <h3>Findings</h3>
+
+                        <ul>
+                            {% for reason in result.reasons %}
+                            <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <p class="notice">
+                            This tool uses basic pattern-based checks.
+                            Its results do not guarantee that a link or
+                            message is safe or fraudulent. Verify
+                            suspicious content independently.
+                        </p>
+
+                    </div>
+                    {% endif %}
+
+                </section>
+
+                <!-- SAFETY TIPS -->
+                <section class="tips safety-panel" id="safety">
+
+                    <div class="section-heading">
+                        <div class="heading-icon">◇</div>
+                        <div>
+                            <h2>Online Safety Tips</h2>
+                            <p>Protect yourself from online scams.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <span class="tip-number">01</span>
+                        <p>Never share your OTP, PIN or password.</p>
+                    </div>
+
+                    <div class="tip-item">
+                        <span class="tip-number">02</span>
+                        <p>Verify offers through official websites.</p>
+                    </div>
+
+                    <div class="tip-item">
+                        <span class="tip-number">03</span>
+                        <p>Avoid clicking unexpected links.</p>
+                    </div>
+
+                    <div class="tip-item">
+                        <span class="tip-number">04</span>
+                        <p>Never send money under pressure.</p>
+                    </div>
+
+                </section>
+
+            </div>
+
+            <!-- SCAN HISTORY -->
+            <section class="scanner history-panel" id="history">
+
+                <div class="history-heading">
+                    <div class="section-heading">
+                        <div class="heading-icon">◷</div>
+                        <div>
+                            <h2>Recent Scan History</h2>
+                            <p>Your latest scan records</p>
+                        </div>
+                    </div>
+
+                    {% if history %}
+                    <form method="POST"
+                          action="{{ url_for('clear_history') }}"
+                          onsubmit="return confirm('Are you sure you want to delete all scan history?');">
+
+                        <button type="submit" class="clear-button">
+                            Clear All History
+                        </button>
+
+                    </form>
+                    {% endif %}
+                </div>
+
+                {% if history %}
+
+                <div class="history-list">
+
+                    {% for item in history %}
+                    <article class="history-item">
+
+                        <div class="history-item-top">
+                            <span class="history-type">
+                                {% if item["scan_type"] == "url" %}
+                                    🔗 Website URL
+                                {% else %}
+                                    💬 Message
+                                {% endif %}
+                            </span>
+
+                            <span class="risk risk-{{ item['risk']|lower }}">
+                                {{ item["risk"] }} Risk
+                            </span>
+                        </div>
+
+                        <p class="history-input">
+                            {{ item["scanned_text"] }}
+                        </p>
+
+                        <div class="history-details">
+                            <p>
+                                <strong>Findings:</strong>
+                                {{ item["reasons"] }}
+                            </p>
+
+                            <p>
+                                <strong>Date:</strong>
+                                {{ item["scanned_at"] }}
+                            </p>
+                        </div>
+
+                        <form method="POST"
+                              action="{{ url_for('delete_scan', scan_id=item['id']) }}"
+                              onsubmit="return confirm('Delete this scan record?');">
+
+                            <button type="submit" class="delete-button">
+                                Delete Record
+                            </button>
+
+                        </form>
+
+                    </article>
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-history">
+                    <div class="empty-icon">◷</div>
+                    <h3>No Scan History Yet</h3>
+                    <p>Your completed scans will appear here.</p>
+                    <a href="#scanner" class="empty-button">
+                        Scan Your First Link
+                    </a>
+                </div>
+
+                {% endif %}
+
+            </section>
+
+            <!-- ABOUT -->
+            <section class="about-panel" id="about">
+                <div class="about-icon">🛡️</div>
+
+                <div>
+                    <h2>About Scam Shield</h2>
+                    <p>
+                        Scam Shield is a BCA minor project designed
+                        to identify potential warning signs in
+                        suspicious URLs and text messages.
+                    </p>
+                </div>
+            </section>
+
+            <!-- FOOTER -->
+            <footer>
+                <p>© 2026 Scam Shield | BCA Minor Project</p>
+                <p>Think Before You Click. Stay Safe Online.</p>
+            </footer>
+
+        </main>
+
+    </div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+{% if result %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.querySelector(
+        'form select[name="scan_type"]'
+    );
+
+    const textBox = document.querySelector(
+        'form textarea[name="text"]'
+    );
+
+    if (textBox) {
+        textBox.value = "";
+    }
+});
+</script>
+{% endif %}
+
+</body>
+</html>
